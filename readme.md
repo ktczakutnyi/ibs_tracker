@@ -6,6 +6,7 @@ IBS Tracker is a frontend-only web app for logging bowel movements and IBS sympt
 - Stores all data locally in the browser (`localStorage`).
 - Supports optional photo attachments (stored as data URLs in local storage).
 - Works without account login or backend services.
+- Can be packaged as an Android app using Capacitor (Android Studio + Android SDK).
 
 ## Repository Layout
 
@@ -121,3 +122,15 @@ Routes are configured in `src/pages.config.js`:
 ## License
 
 No license file is currently defined in this repository.
+
+## Android Packaging
+
+From `gut-log-daily/gut-log-daily`:
+
+```bash
+npm run android:sync
+npm run android:init   # one-time setup
+npm run android:open
+```
+
+Then build/run from Android Studio using your installed Android SDK.
