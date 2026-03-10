@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { localData } from "@/api/localDataClient";
 import { useQuery } from "@tanstack/react-query";
 import { addMonths, format } from "date-fns";
-import { Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CalendarGrid from "@/components/poop/CalendarGrid";
 import EntryCard from "@/components/poop/EntryCard";
 import DayEntriesModal from "@/components/poop/DayEntriesModal";
-import { BRISTOL_TYPES } from "@/components/poop/BristolTypeSelector";
 import { SYMPTOM_OPTIONS, getSymptomEmoji } from "@/components/poop/SymptomSelector";
 import { cn } from "@/lib/utils";
 
@@ -55,12 +53,12 @@ export default function Home() {
 
   const { data: poopEntries = [] } = useQuery({
     queryKey: ["poop-entries"],
-    queryFn: () => base44.entities.PoopEntry.list("-date", 200),
+    queryFn: () => localData.entities.PoopEntry.list("-date", 200),
   });
 
   const { data: symptomEntries = [], isLoading } = useQuery({
     queryKey: ["symptom-entries"],
-    queryFn: () => base44.entities.SymptomEntry.list("-date", 200),
+    queryFn: () => localData.entities.SymptomEntry.list("-date", 200),
   });
 
   // Build combined calendar entries for CalendarGrid

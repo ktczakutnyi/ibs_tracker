@@ -1,6 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
-import { X, Plus } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BRISTOL_TYPES } from "./BristolTypeSelector";
 import { SYMPTOM_OPTIONS, getSymptomEmoji } from "./SymptomSelector";

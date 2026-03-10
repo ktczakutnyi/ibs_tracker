@@ -1,5 +1,5 @@
 import React from "react";
-import { base44 } from "@/api/base44Client";
+import { localData } from "@/api/localDataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -20,13 +20,13 @@ export default function SymptomDetail() {
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["symptom-entries"],
-    queryFn: () => base44.entities.SymptomEntry.list("-date", 500),
+    queryFn: () => localData.entities.SymptomEntry.list("-date", 500),
   });
 
   const entry = entries.find((e) => e.id === entryId);
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.SymptomEntry.delete(entryId),
+    mutationFn: () => localData.entities.SymptomEntry.delete(entryId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["symptom-entries"] });
       navigate(createPageUrl("Home"));

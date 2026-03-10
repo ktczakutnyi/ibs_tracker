@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { localData } from "@/api/localDataClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -25,7 +25,7 @@ export default function NewSymptomEntry() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.SymptomEntry.create(data),
+    mutationFn: (data) => localData.entities.SymptomEntry.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["symptom-entries"] });
       navigate(createPageUrl("Home"));
