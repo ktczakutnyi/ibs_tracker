@@ -1,5 +1,5 @@
 import React from "react";
-import { base44 } from "@/api/base44Client";
+import { localData } from "@/api/localDataClient";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -12,7 +12,7 @@ export default function AllEntries() {
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["poop-entries"],
-    queryFn: () => base44.entities.PoopEntry.list("-date", 500),
+    queryFn: () => localData.entities.PoopEntry.list("-date", 500),
   });
 
   return (

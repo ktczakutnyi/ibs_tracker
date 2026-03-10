@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { localData } from "@/api/localDataClient";
 import { Camera, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -12,7 +12,7 @@ export default function PhotoUploader({ value, onChange }) {
     if (!file) return;
 
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await localData.integrations.Core.UploadFile({ file });
     onChange(file_url);
     setUploading(false);
   };

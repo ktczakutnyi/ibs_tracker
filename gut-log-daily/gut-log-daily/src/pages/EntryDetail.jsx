@@ -1,5 +1,5 @@
 import React from "react";
-import { base44 } from "@/api/base44Client";
+import { localData } from "@/api/localDataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -17,13 +17,13 @@ export default function EntryDetail() {
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["poop-entries"],
-    queryFn: () => base44.entities.PoopEntry.list("-date", 200),
+    queryFn: () => localData.entities.PoopEntry.list("-date", 200),
   });
 
   const entry = entries.find((e) => e.id === entryId);
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.PoopEntry.delete(entryId),
+    mutationFn: () => localData.entities.PoopEntry.delete(entryId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["poop-entries"] });
       navigate(createPageUrl("Home"));
