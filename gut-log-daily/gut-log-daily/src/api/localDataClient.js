@@ -15,6 +15,13 @@ const STORAGE_KEYS = {
   PoopEntry: "ibs_tracker_poop_entries",
   SymptomEntry: "ibs_tracker_symptom_entries",
 };
+const IMAGE_EXTENSION_PATTERN = /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|webp)$/i;
+
+const isImageFile = (file) => {
+  if (!file) return false;
+  if (file.type?.startsWith("image/")) return true;
+  return IMAGE_EXTENSION_PATTERN.test(file.name || "");
+};
 
 const readCollection = (collectionName) => {
   const raw = storage.getItem(STORAGE_KEYS[collectionName]);
@@ -77,6 +84,11 @@ const createEntityApi = (collectionName) => ({
 
 const uploadFile = (file) =>
   new Promise((resolve, reject) => {
+    if (!isImageFile(file)) {
+      reject(new Error("Only image files are allowed."));
+      return;
+    }
+
     const reader = new FileReader();
 
     reader.onload = () => resolve({ file_url: reader.result });
