@@ -81,6 +81,31 @@ From `gut-log-daily/gut-log-daily`:
 - `npm run lint:fix` - Auto-fix lint issues.
 - `npm run typecheck` - Run TypeScript check using `jsconfig.json`.
 
+
+## Can this be secure without hosting a server?
+
+Yes, for a single-user/offline use case you can meaningfully improve security without a backend.
+This project now includes local hardening features:
+
+- Optional PIN-based app lock + encrypted local entry storage.
+- Configurable retention window to auto-prune old records.
+- Photo upload hardening (size limit + SVG blocked + re-encode/downscale before storage).
+- Local export and secure wipe controls.
+
+Important limitation: without a server there is no cross-device identity, remote revocation, or server-side authorization.
+
+
+## Merge Gate Recommendation
+
+For changes on shared branches, require one green CI run before merge:
+
+- `npm ci`
+- `npm run build`
+- `npm run lint`
+- security checks (`npm audit` + SBOM generation)
+
+This avoids blocking on local environment quirks while still enforcing quality and security in a reproducible runner.
+
 ## Data Storage and Privacy
 
 - All entries are stored in browser `localStorage`.
@@ -118,6 +143,7 @@ Routes are configured in `src/pages.config.js`:
 - The app currently uses a local-only auth context stub (`src/lib/AuthContext.jsx`).
 - `src/pages.config.js` is marked auto-generated; only `mainPage` should be edited manually.
 - Keep UI behavior consistent for both entry types when adding new features.
+- Follow `SECURITY_RELEASE_CHECKLIST.md` before mobile production releases.
 
 ## License
 

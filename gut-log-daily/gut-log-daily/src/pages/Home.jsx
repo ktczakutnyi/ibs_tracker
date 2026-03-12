@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { localData } from "@/api/localDataClient";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addMonths, format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import EntryCard from "@/components/poop/EntryCard";
 import DayEntriesModal from "@/components/poop/DayEntriesModal";
 import { SYMPTOM_OPTIONS, getSymptomEmoji } from "@/components/poop/SymptomSelector";
 import { cn } from "@/lib/utils";
+import SecuritySettingsCard from "@/components/security/SecuritySettingsCard";
 
 function SymptomCard({ entry, onClick }) {
   const emoji = getSymptomEmoji(entry.symptoms || []);
@@ -52,8 +53,17 @@ export default function Home() {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [addMenuDate, setAddMenuDate] = useState(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Load both entry collections. React Query handles caching and background refreshes.
+
+  // SecuritySettingsCard gives users actions that can change stored data (wipe/retention).
+  // After those actions, we refresh both entry lists so UI stays accurate.
+  const reloadEntries = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["poop-entries"] });
+    await queryClient.invalidateQueries({ queryKey: ["symptom-entries"] });
+  };
+
   const { data: poopEntries = [] } = useQuery({
     queryKey: ["poop-entries"],
     queryFn: () => localData.entities.PoopEntry.list("-date", 200),
@@ -126,6 +136,9 @@ export default function Home() {
           entries={allCalendarEntries}
           onDayClick={handleDayClick}
         />
+
+        {/* Friendly privacy controls for non-technical users. */}
+        <SecuritySettingsCard onDataChanged={reloadEntries} />
 
         {/* Recent Entries */}
         <div className="mt-8">

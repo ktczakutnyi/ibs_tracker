@@ -1,26 +1,28 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
-import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import React, { useEffect, useState } from "react";
+
+// Top-level app shell.
+// We enforce lock screen access here so every route is protected consistently.
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClientInstance } from "@/lib/query-client";
+import { pagesConfig } from "./pages.config";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import PageNotFound from "./lib/PageNotFound";
+import { AuthProvider, useAuth } from "@/lib/AuthContext";
+import { security } from "@/lib/security";
+import AppLockScreen from "@/components/security/AppLockScreen";
 
 const { Pages, Layout, mainPage } = pagesConfig;
-// Decide which page should be shown at "/".
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
-// Some projects provide a shared layout (header/nav), some do not.
-// This wrapper lets both setups work with one router config.
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+const LayoutWrapper = ({ children, currentPageName }) =>
+  Layout ? <Layout currentPageName={currentPageName}>{children}</Layout> : <>{children}</>;
 
+// Router content shown after lock/auth loading checks are done.
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -29,14 +31,16 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Render the main app
   return (
     <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
+      <Route
+        path="/"
+        element={
+          <LayoutWrapper currentPageName={mainPageKey}>
+            <MainPage />
+          </LayoutWrapper>
+        }
+      />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
@@ -53,12 +57,32 @@ const AuthenticatedApp = () => {
   );
 };
 
-
 function App() {
-  // App-wide providers are mounted once at the top:
-  // - AuthProvider: user/auth state
-  // - QueryClientProvider: data caching + refetching
-  // - Router: URL-based navigation
+  // If a PIN is enabled and we do not have a valid unlocked session key, keep app locked.
+  const [locked, setLocked] = useState(() => security.isLocked());
+
+  useEffect(() => {
+    // Privacy feature: auto-lock when app goes to background/inactive tab.
+    const onVisibilityChange = () => {
+      if (document.hidden && security.getSecurityConfig().pinEnabled) {
+        security.lockNow();
+        setLocked(true);
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, []);
+
+  const handleUnlock = async (pin) => {
+    await security.unlockWithPin(pin);
+    setLocked(false);
+  };
+
+  if (locked) {
+    return <AppLockScreen onUnlock={handleUnlock} />;
+  }
+
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
@@ -68,7 +92,7 @@ function App() {
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>
-  )
+  );
 }
 
-export default App
+export default App;

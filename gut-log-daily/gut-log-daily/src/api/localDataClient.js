@@ -1,52 +1,59 @@
-// This file is a tiny "fake backend" that keeps everything in localStorage.
-// We keep all read/write logic here so page components stay focused on UI.
-const isBrowser = typeof window !== "undefined";
+// Local data client used by the UI.
+//
+// This app has no backend server, so this module acts like a tiny data layer:
+// - CRUD for entries
+// - secure read/write delegation
+// - safe image processing for uploads
+//
+// Keeping this logic here makes page components simpler and easier to reason about.
 
-// Guarded storage helper so this module also behaves safely in non-browser environments.
-const storage = {
-  getItem(key) {
-    if (!isBrowser) return null;
-    return window.localStorage.getItem(key);
-  },
-  setItem(key, value) {
-    if (!isBrowser) return;
-    window.localStorage.setItem(key, value);
-  },
-};
+import { security } from "@/lib/security";
 
-// Storage buckets used by the two entry types in this app.
-const STORAGE_KEYS = {
-  PoopEntry: "ibs_tracker_poop_entries",
-  SymptomEntry: "ibs_tracker_symptom_entries",
-};
-const IMAGE_EXTENSION_PATTERN = /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|webp)$/i;
+const IMAGE_EXTENSION_PATTERN = /\.(avif|bmp|gif|heic|heif|jpe?g|png|webp)$/i;
+const BLOCKED_IMAGE_MIME = new Set(["image/svg+xml"]);
+const MAX_IMAGE_DIMENSION = 1600;
 
-// Basic validation for uploaded files (MIME type first, extension fallback second).
 const isImageFile = (file) => {
   if (!file) return false;
+  if (BLOCKED_IMAGE_MIME.has(file.type)) return false;
   if (file.type?.startsWith("image/")) return true;
   return IMAGE_EXTENSION_PATTERN.test(file.name || "");
 };
 
-// Read + parse one localStorage collection.
-const readCollection = (collectionName) => {
-  const raw = storage.getItem(STORAGE_KEYS[collectionName]);
-  if (!raw) return [];
+// Re-encode images before storage to reduce size and strip risky/unused metadata where possible.
+const downscaleImageToJpegDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+        const width = Math.max(1, Math.round(img.width * scale));
+        const height = Math.max(1, Math.round(img.height * scale));
 
-// Save a full collection back to localStorage.
-const writeCollection = (collectionName, entries) => {
-  storage.setItem(STORAGE_KEYS[collectionName], JSON.stringify(entries));
-};
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
 
-// Supports sort strings like "date" (ascending) and "-date" (descending).
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Could not process image."));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+
+      img.onerror = () => reject(new Error("Image decode failed."));
+      img.src = String(reader.result || "");
+    };
+
+    reader.onerror = () => reject(new Error("Failed to read photo."));
+    reader.readAsDataURL(file);
+  });
+
 const sortByField = (entries, orderBy) => {
   if (!orderBy) return entries;
 
@@ -66,49 +73,51 @@ const sortByField = (entries, orderBy) => {
   });
 };
 
-// Factory that gives each entity the same CRUD-shaped API.
+// Shared CRUD API for both PoopEntry and SymptomEntry collections.
 const createEntityApi = (collectionName) => ({
   async list(orderBy, limit = 100) {
-    const entries = readCollection(collectionName);
-    return sortByField(entries, orderBy).slice(0, limit);
+    const entries = await security.readCollectionSecure(collectionName);
+    const retained = security.applyRetention(entries);
+    if (retained.length !== entries.length) {
+      await security.writeCollectionSecure(collectionName, retained);
+    }
+    return sortByField(retained, orderBy).slice(0, limit);
   },
   async create(payload) {
-    // We assign IDs/timestamps here so forms don't need to care about those details.
-    const entries = readCollection(collectionName);
+    const entries = await security.readCollectionSecure(collectionName);
+    const next = security.applyRetention(entries);
     const newEntry = {
       ...payload,
       id: crypto.randomUUID(),
       created_at: new Date().toISOString(),
     };
 
-    writeCollection(collectionName, [...entries, newEntry]);
+    await security.writeCollectionSecure(collectionName, [...next, newEntry]);
     return newEntry;
   },
   async delete(id) {
-    const entries = readCollection(collectionName);
+    const entries = await security.readCollectionSecure(collectionName);
     const filtered = entries.filter((entry) => entry.id !== id);
-    writeCollection(collectionName, filtered);
+    await security.writeCollectionSecure(collectionName, filtered);
     return { success: true };
   },
 });
 
-// Reads a local image as a data URL string so it can be stored in localStorage.
-const uploadFile = (file) =>
-  new Promise((resolve, reject) => {
-    if (!isImageFile(file)) {
-      reject(new Error("Only image files are allowed."));
-      return;
-    }
+// Upload flow in this offline app means: validate + process image, then return a local data URL.
+const uploadFile = async (file) => {
+  if (!isImageFile(file)) {
+    throw new Error("Only non-SVG image files are allowed.");
+  }
 
-    const reader = new FileReader();
+  const maxImageBytes = security.getMaxImageBytes();
+  if (file.size > maxImageBytes) {
+    throw new Error(`Image is too large. Max size is ${(maxImageBytes / (1024 * 1024)).toFixed(0)}MB.`);
+  }
 
-    reader.onload = () => resolve({ file_url: reader.result });
-    reader.onerror = () => reject(new Error("Failed to read photo."));
+  const file_url = await downscaleImageToJpegDataUrl(file);
+  return { file_url };
+};
 
-    reader.readAsDataURL(file);
-  });
-
-// Public API used everywhere else in the app.
 export const localData = {
   entities: {
     PoopEntry: createEntityApi("PoopEntry"),
