@@ -12,11 +12,13 @@ import SymptomSelector from "@/components/poop/SymptomSelector";
 import PainScaleSelector from "@/components/poop/PainScaleSelector";
 
 export default function NewSymptomEntry() {
+  // This screen creates a symptom-focused entry.
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const presetDate = urlParams.get("date") || format(new Date(), "yyyy-MM-dd");
 
+  // Keep all user inputs in one object for easier updates and submission.
   const [formData, setFormData] = useState({
     date: presetDate,
     symptoms: [],
@@ -24,6 +26,7 @@ export default function NewSymptomEntry() {
     notes: "",
   });
 
+  // After save succeeds we refresh symptom list cache and return home.
   const createMutation = useMutation({
     mutationFn: (data) => localData.entities.SymptomEntry.create(data),
     onSuccess: () => {
@@ -32,6 +35,7 @@ export default function NewSymptomEntry() {
     },
   });
 
+  // Require at least one symptom before sending data.
   const handleSubmit = () => {
     if (formData.symptoms.length === 0) return;
     const payload = { ...formData };

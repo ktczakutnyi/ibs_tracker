@@ -8,11 +8,13 @@ import { getSymptomEmoji } from "./SymptomSelector";
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function CalendarGrid({ currentMonth, onMonthChange, entries, onDayClick }) {
+  // Build calendar boundaries (start/end of visible month including leading/trailing days).
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const calStart = startOfWeek(monthStart);
   const calEnd = endOfWeek(monthEnd);
 
+  // Group entries by date so each day cell can render quickly.
   const poopMap = {};
   const symptomMap = {};
   entries.forEach((e) => {
@@ -27,6 +29,7 @@ export default function CalendarGrid({ currentMonth, onMonthChange, entries, onD
     }
   });
 
+  // Convert the date range into rows of 7 days (calendar weeks).
   const weeks = [];
   let day = calStart;
   while (day <= calEnd) {

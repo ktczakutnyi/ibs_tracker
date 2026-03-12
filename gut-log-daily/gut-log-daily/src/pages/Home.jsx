@@ -46,12 +46,14 @@ function SymptomCard({ entry, onClick }) {
 }
 
 export default function Home() {
+  // These state values control what month is visible and which popups are open.
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [addMenuDate, setAddMenuDate] = useState(null);
   const navigate = useNavigate();
 
+  // Load both entry collections. React Query handles caching and background refreshes.
   const { data: poopEntries = [] } = useQuery({
     queryKey: ["poop-entries"],
     queryFn: () => localData.entities.PoopEntry.list("-date", 200),
@@ -68,6 +70,7 @@ export default function Home() {
     ...symptomEntries.map((e) => ({ ...e, _type: "symptom" })),
   ];
 
+  // If the day is empty we open a quick-add menu; otherwise we show that day's entries.
   const handleDayClick = (day, dayEntries) => {
     const dateStr = format(day, "yyyy-MM-dd");
     const dayPoops = poopEntries.filter((e) => e.date?.startsWith(dateStr));
@@ -100,6 +103,7 @@ export default function Home() {
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 12);
 
+  // Pre-filter entries used by the day-details bottom sheet.
   const selectedDayStr = selectedDay ? format(selectedDay, "yyyy-MM-dd") : null;
   const modalPoops = selectedDay ? poopEntries.filter((e) => e.date?.startsWith(selectedDayStr)) : [];
   const modalSymptoms = selectedDay ? symptomEntries.filter((e) => e.date?.startsWith(selectedDayStr)) : [];

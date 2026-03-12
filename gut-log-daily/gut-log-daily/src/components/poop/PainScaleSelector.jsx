@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
+// Visual color ramp for 1-10 pain values.
 const SCALE_COLORS = [
   "", // 0 unused
   "bg-green-400",
@@ -18,6 +19,7 @@ const SCALE_COLORS = [
 const SCALE_LABELS = { 1: "Minimal", 3: "Mild", 5: "Moderate", 7: "Severe", 10: "Worst" };
 
 export default function PainScaleSelector({ value, onChange }) {
+  // Horizontal button row lets users quickly tap their current pain level.
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">

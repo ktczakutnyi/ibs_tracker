@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
+// Reference table for Bristol stool scale options shown across the app.
 const BRISTOL_TYPES = [
   { type: 1, emoji: "🌑", label: "Hard lumps", desc: "Separate hard lumps, like nuts", tag: "Constipation", color: "bg-red-50 border-red-200 text-red-800" },
   { type: 2, emoji: "🪵", label: "Lumpy sausage", desc: "Sausage-shaped but lumpy", tag: "Mild constipation", color: "bg-orange-50 border-orange-200 text-orange-800" },
@@ -14,6 +15,7 @@ const BRISTOL_TYPES = [
 export { BRISTOL_TYPES };
 
 export default function BristolTypeSelector({ value, onChange }) {
+  // Renders selectable cards; selected card is highlighted and returns its type number.
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-stone-700">Bristol Stool Type</label>

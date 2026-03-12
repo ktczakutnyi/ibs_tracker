@@ -10,6 +10,7 @@ import { BRISTOL_TYPES } from "@/components/poop/BristolTypeSelector";
 import { cn } from "@/lib/utils";
 
 export default function EntryDetail() {
+  // Detail page for one poop entry, identified by the id in the URL query string.
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
@@ -22,6 +23,7 @@ export default function EntryDetail() {
 
   const entry = entries.find((e) => e.id === entryId);
 
+  // Deleting invalidates cached list data so the home page updates immediately.
   const deleteMutation = useMutation({
     mutationFn: () => localData.entities.PoopEntry.delete(entryId),
     onSuccess: () => {

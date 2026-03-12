@@ -55,6 +55,7 @@ function SymptomEntryRow({ entry, onClick }) {
 }
 
 export default function DayEntriesModal({ day, poopEntries, symptomEntries, onClose }) {
+  // Bottom-sheet modal that summarizes everything logged for one day.
   const navigate = useNavigate();
   const dateStr = format(day, "yyyy-MM-dd");
 

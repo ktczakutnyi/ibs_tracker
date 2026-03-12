@@ -12,10 +12,12 @@ const isImageFile = (file) => {
 };
 
 export default function PhotoUploader({ value, onChange }) {
+  // Hidden file input is triggered by a custom button for better mobile UX.
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
+  // Validate file, upload (read as data URL), then send the URL back to parent form.
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
