@@ -49,6 +49,7 @@ export default function Home() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [addMenuDate, setAddMenuDate] = useState(null);
   const navigate = useNavigate();
 
   const { data: poopEntries = [] } = useQuery({
@@ -72,11 +73,24 @@ export default function Home() {
     const dayPoops = poopEntries.filter((e) => e.date?.startsWith(dateStr));
     const daySymptoms = symptomEntries.filter((e) => e.date?.startsWith(dateStr));
     if (dayPoops.length === 0 && daySymptoms.length === 0) {
-      navigate(createPageUrl("NewEntry") + `?date=${dateStr}`);
+      setAddMenuDate(dateStr);
+      setShowAddMenu(true);
     } else {
       setSelectedDay(day);
     }
   };
+
+  const closeAddMenu = () => {
+    setShowAddMenu(false);
+    setAddMenuDate(null);
+  };
+
+  const symptomEntryUrl = addMenuDate
+    ? `${createPageUrl("NewSymptomEntry")}?date=${addMenuDate}`
+    : createPageUrl("NewSymptomEntry");
+  const poopEntryUrl = addMenuDate
+    ? `${createPageUrl("NewEntry")}?date=${addMenuDate}`
+    : createPageUrl("NewEntry");
 
   // Merge and sort recent entries
   const recentEntries = [
@@ -158,12 +172,12 @@ export default function Home() {
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2">
         {showAddMenu && (
           <div className="flex flex-col gap-2 items-center mb-1">
-            <Link to={createPageUrl("NewSymptomEntry")} onClick={() => setShowAddMenu(false)}>
+            <Link to={symptomEntryUrl} onClick={closeAddMenu}>
               <Button className="h-12 px-5 rounded-full bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg gap-2 font-semibold">
                 🤕 Log Symptoms
               </Button>
             </Link>
-            <Link to={createPageUrl("NewEntry")} onClick={() => setShowAddMenu(false)}>
+            <Link to={poopEntryUrl} onClick={closeAddMenu}>
               <Button className="h-12 px-5 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-lg gap-2 font-semibold">
                 💩 Log Poop
               </Button>
@@ -171,7 +185,13 @@ export default function Home() {
           </div>
         )}
         <Button
-          onClick={() => setShowAddMenu((v) => !v)}
+          onClick={() => {
+            if (showAddMenu) {
+              closeAddMenu();
+              return;
+            }
+            setShowAddMenu(true);
+          }}
           className={cn(
             "h-14 w-14 rounded-full text-white shadow-xl font-bold text-2xl transition-all",
             showAddMenu ? "bg-stone-500 hover:bg-stone-600 rotate-45" : "bg-gradient-to-br from-amber-400 to-indigo-500 hover:opacity-90"
@@ -183,7 +203,7 @@ export default function Home() {
 
       {/* Backdrop for FAB menu */}
       {showAddMenu && (
-        <div className="fixed inset-0 z-30" onClick={() => setShowAddMenu(false)} />
+        <div className="fixed inset-0 z-30" onClick={closeAddMenu} />
       )}
     </div>
   );
