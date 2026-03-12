@@ -3,7 +3,8 @@ import { localData } from "@/api/localDataClient";
 import { Camera, X, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const IMAGE_EXTENSION_PATTERN = /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|webp)$/i;
+const IMAGE_EXTENSION_PATTERN = /\.(avif|bmp|gif|heic|heif|jpe?g|png|webp)$/i;
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 const isImageFile = (file) => {
   if (!file) return false;
@@ -23,7 +24,13 @@ export default function PhotoUploader({ value, onChange }) {
     if (!file) return;
 
     if (!isImageFile(file)) {
-      setError("Please choose an image file (jpg, png, webp, etc).");
+      setError("Please choose a supported image file (jpg, png, webp, etc). SVG is blocked.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError("Image is too large. Max file size is 2MB.");
       e.target.value = "";
       return;
     }
