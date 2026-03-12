@@ -10,6 +10,7 @@ export const SYMPTOM_OPTIONS = [
 ];
 
 export function getSymptomEmoji(symptoms = []) {
+  // Pick one representative emoji for quick previews on cards/calendar.
   if (symptoms.includes("bloating")) return "🎈";
   if (symptoms.includes("abdominal_pain")) return "😣";
   if (symptoms.includes("cramping")) return "😖";
@@ -19,6 +20,7 @@ export function getSymptomEmoji(symptoms = []) {
 }
 
 export default function SymptomSelector({ value = [], onChange }) {
+  // Multi-select toggle behavior: click once to add, again to remove.
   const toggle = (id) => {
     if (value.includes(id)) {
       onChange(value.filter((s) => s !== id));

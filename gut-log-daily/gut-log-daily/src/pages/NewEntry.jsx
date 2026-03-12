@@ -12,11 +12,13 @@ import BristolTypeSelector from "@/components/poop/BristolTypeSelector";
 import PhotoUploader from "@/components/poop/PhotoUploader";
 
 export default function NewEntry() {
+  // This screen creates a bowel movement entry.
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const presetDate = urlParams.get("date") || format(new Date(), "yyyy-MM-dd");
 
+  // Form state mirrors each field on screen so typing updates the UI instantly.
   const [formData, setFormData] = useState({
     date: presetDate,
     bristol_type: null,
@@ -24,6 +26,7 @@ export default function NewEntry() {
     photo_url: "",
   });
 
+  // Mutation = async create request + loading/error lifecycle.
   const createMutation = useMutation({
     mutationFn: (data) => localData.entities.PoopEntry.create(data),
     onSuccess: () => {
@@ -32,6 +35,7 @@ export default function NewEntry() {
     },
   });
 
+  // Validate minimum required data, clean empty optional fields, then save.
   const handleSubmit = () => {
     if (!formData.bristol_type) return;
     const payload = { ...formData };

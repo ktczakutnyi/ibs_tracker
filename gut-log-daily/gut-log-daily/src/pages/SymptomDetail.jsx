@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { SYMPTOM_OPTIONS, getSymptomEmoji } from "@/components/poop/SymptomSelector";
 import { cn } from "@/lib/utils";
 
+// Mapping arrays convert numeric pain score into UI color + readable label.
 const PAIN_COLORS = ["", "bg-green-400", "bg-green-400", "bg-lime-400", "bg-yellow-400", "bg-yellow-500", "bg-orange-400", "bg-orange-500", "bg-red-400", "bg-red-500", "bg-red-600"];
 const PAIN_LABELS = ["", "Minimal", "Mild", "Mild", "Moderate", "Moderate", "Noticeable", "Severe", "Severe", "Intense", "Worst Possible"];
 
 export default function SymptomDetail() {
+  // Detail page for one symptom entry, identified by URL query id.
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);

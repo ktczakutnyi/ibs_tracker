@@ -7,9 +7,12 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 
 const { Pages, Layout, mainPage } = pagesConfig;
+// Decide which page should be shown at "/".
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
+// Some projects provide a shared layout (header/nav), some do not.
+// This wrapper lets both setups work with one router config.
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
@@ -52,7 +55,10 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-
+  // App-wide providers are mounted once at the top:
+  // - AuthProvider: user/auth state
+  // - QueryClientProvider: data caching + refetching
+  // - Router: URL-based navigation
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>

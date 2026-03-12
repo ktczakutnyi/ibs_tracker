@@ -5,6 +5,7 @@ import { Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function EntryCard({ entry, onClick }) {
+  // Compact preview card used in lists (home + all entries).
   const bristolInfo = BRISTOL_TYPES.find((b) => b.type === entry.bristol_type) || BRISTOL_TYPES[3];
 
   return (
