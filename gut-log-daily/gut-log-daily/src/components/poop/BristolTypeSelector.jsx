@@ -2,12 +2,12 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 const BRISTOL_TYPES = [
-  { type: 1, emoji: "🪨", label: "Hard lumps", desc: "Separate hard lumps, like nuts", tag: "Constipation", color: "bg-red-50 border-red-200 text-red-800" },
-  { type: 2, emoji: "🌰", label: "Lumpy sausage", desc: "Sausage-shaped but lumpy", tag: "Mild constipation", color: "bg-orange-50 border-orange-200 text-orange-800" },
+  { type: 1, emoji: "🌑", label: "Hard lumps", desc: "Separate hard lumps, like nuts", tag: "Constipation", color: "bg-red-50 border-red-200 text-red-800" },
+  { type: 2, emoji: "🪵", label: "Lumpy sausage", desc: "Sausage-shaped but lumpy", tag: "Mild constipation", color: "bg-orange-50 border-orange-200 text-orange-800" },
   { type: 3, emoji: "🥖", label: "Cracked sausage", desc: "Sausage with cracks on surface", tag: "Normal", color: "bg-yellow-50 border-yellow-200 text-yellow-800" },
   { type: 4, emoji: "🐍", label: "Smooth snake", desc: "Smooth and soft sausage or snake", tag: "Ideal", color: "bg-green-50 border-green-200 text-green-800" },
-  { type: 5, emoji: "☁️", label: "Soft blobs", desc: "Soft blobs with clear-cut edges", tag: "Lacking fiber", color: "bg-sky-50 border-sky-200 text-sky-800" },
-  { type: 6, emoji: "💨", label: "Mushy", desc: "Fluffy pieces, ragged edges", tag: "Diarrhea", color: "bg-purple-50 border-purple-200 text-purple-800" },
+  { type: 5, emoji: "🧼", label: "Soft blobs", desc: "Soft blobs with clear-cut edges", tag: "Lacking fiber", color: "bg-sky-50 border-sky-200 text-sky-800" },
+  { type: 6, emoji: "☁️", label: "Mushy", desc: "Fluffy pieces, ragged edges", tag: "Diarrhea", color: "bg-purple-50 border-purple-200 text-purple-800" },
   { type: 7, emoji: "💧", label: "Liquid", desc: "Watery, no solid pieces", tag: "Severe diarrhea", color: "bg-red-50 border-red-300 text-red-900" },
 ];
 
