@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { localData } from "@/api/localDataClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addMonths, format } from "date-fns";
@@ -51,13 +51,29 @@ export default function Home() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
+
+  // Settings flyout state (opened by the top-right gear emoji button).
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const settingsRef = useRef(null);
+
   const [addMenuDate, setAddMenuDate] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    // Close the settings menu when user clicks anywhere outside of it.
+    const handleOutside = (event) => {
+      if (!settingsRef.current) return;
+      if (!settingsRef.current.contains(event.target)) setShowSettingsMenu(false);
+    };
+
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
   // Load both entry collections. React Query handles caching and background refreshes.
 
-  // SecuritySettingsCard gives users actions that can change stored data (wipe/retention).
+  // SecuritySettingsCard gives users actions that can change stored data (wipe/export).
   // After those actions, we refresh both entry lists so UI stays accurate.
   const reloadEntries = async () => {
     await queryClient.invalidateQueries({ queryKey: ["poop-entries"] });
@@ -81,7 +97,7 @@ export default function Home() {
   ];
 
   // If the day is empty we open a quick-add menu; otherwise we show that day's entries.
-  const handleDayClick = (day, dayEntries) => {
+  const handleDayClick = (day) => {
     const dateStr = format(day, "yyyy-MM-dd");
     const dayPoops = poopEntries.filter((e) => e.date?.startsWith(dateStr));
     const daySymptoms = symptomEntries.filter((e) => e.date?.startsWith(dateStr));
@@ -122,11 +138,30 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-amber-50/80 via-white to-white">
       <div className="max-w-lg mx-auto px-4 pb-28">
         {/* Hero */}
-        <div className="pt-8 pb-6 text-center">
-          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight">
-            🌿 IBS Tracker
-          </h1>
-          <p className="text-sm text-stone-500 mt-1">Track your gut health daily</p>
+        <div className="pt-6 pb-6 relative">
+          {/* Top-right settings button requested by product feedback. */}
+          <div className="absolute top-0 right-0" ref={settingsRef}>
+            <button
+              type="button"
+              aria-label="Open settings"
+              onClick={() => setShowSettingsMenu((prev) => !prev)}
+              className="h-11 w-11 rounded-full border border-stone-200 bg-white text-xl shadow-sm hover:shadow-md transition"
+            >
+              ⚙️
+            </button>
+            {showSettingsMenu && (
+              <div className="absolute right-0 top-12 z-50">
+                <SecuritySettingsCard onDataChanged={reloadEntries} />
+              </div>
+            )}
+          </div>
+
+          <div className="text-center">
+            <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight">
+              🌿 IBS Tracker
+            </h1>
+            <p className="text-sm text-stone-500 mt-1">Track your gut health daily</p>
+          </div>
         </div>
 
         {/* Calendar */}
@@ -136,9 +171,6 @@ export default function Home() {
           entries={allCalendarEntries}
           onDayClick={handleDayClick}
         />
-
-        {/* Friendly privacy controls for non-technical users. */}
-        <SecuritySettingsCard onDataChanged={reloadEntries} />
 
         {/* Recent Entries */}
         <div className="mt-8">
