@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 export default function SecuritySettingsCard({ onDataChanged }) {
   // Local form/input state for this small settings panel.
   const [pin, setPin] = useState("");
+  const [retentionInput, setRetentionInput] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [working, setWorking] = useState(false);
@@ -92,6 +93,32 @@ export default function SecuritySettingsCard({ onDataChanged }) {
           Remove PIN
         </Button>
       )}
+
+      {/* Retention policy lets users automatically delete older records. */}
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-center">
+        <Input
+          type="number"
+          min="0"
+          step="1"
+          inputMode="numeric"
+          value={retentionInput}
+          onChange={(e) => setRetentionInput(e.target.value)}
+          placeholder={`Retention days (current: ${config.retentionDays || 0})`}
+          className="h-10"
+        />
+        <Button
+          variant="outline"
+          disabled={working}
+          onClick={() =>
+            runTask(
+              () => security.updateRetentionDays(retentionInput),
+              "Retention policy saved. Older entries pruned if needed."
+            )
+          }
+        >
+          Save Retention
+        </Button>
+      </div>
 
       {/* Export and destructive delete actions. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
