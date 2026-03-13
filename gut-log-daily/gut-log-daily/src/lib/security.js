@@ -256,6 +256,9 @@ const exportAllData = async () => ({
 const secureWipeAll = () => {
   removeItem(STORAGE_KEYS.poopEntries);
   removeItem(STORAGE_KEYS.symptomEntries);
+  removeItem(STORAGE_KEYS.lockVerifier);
+  removeItem(STORAGE_KEYS.securityConfig);
+  clearSessionKey();
 };
 
 // Enable or rotate PIN lock. This also migrates existing data into encrypted format.
