@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Poop icon">
+  <rect width="1024" height="1024" rx="224" fill="#FFF7ED"/>
+  <g transform="translate(0,8)">
+    <ellipse cx="512" cy="698" rx="286" ry="220" fill="#7A4A28"/>
+    <ellipse cx="512" cy="566" rx="228" ry="168" fill="#8A5732"/>
+    <ellipse cx="512" cy="446" rx="168" ry="122" fill="#9A643A"/>
+    <ellipse cx="512" cy="350" rx="112" ry="78" fill="#AA7548"/>
+    <circle cx="452" cy="644" r="22" fill="#1F2937"/>
+    <circle cx="572" cy="644" r="22" fill="#1F2937"/>
+    <path d="M434 734 Q512 790 590 734" fill="none" stroke="#1F2937" stroke-width="24" stroke-linecap="round"/>
+  </g>
+</svg>

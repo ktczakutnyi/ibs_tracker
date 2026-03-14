@@ -56,7 +56,6 @@ export default function Home() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const settingsRef = useRef(null);
 
-  const [addMenuDate, setAddMenuDate] = useState(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -96,30 +95,18 @@ export default function Home() {
     ...symptomEntries.map((e) => ({ ...e, _type: "symptom" })),
   ];
 
-  // If the day is empty we open a quick-add menu; otherwise we show that day's entries.
+  // Always open the same day-details sheet so empty and non-empty days feel consistent.
   const handleDayClick = (day) => {
-    const dateStr = format(day, "yyyy-MM-dd");
-    const dayPoops = poopEntries.filter((e) => e.date?.startsWith(dateStr));
-    const daySymptoms = symptomEntries.filter((e) => e.date?.startsWith(dateStr));
-    if (dayPoops.length === 0 && daySymptoms.length === 0) {
-      setAddMenuDate(dateStr);
-      setShowAddMenu(true);
-    } else {
-      setSelectedDay(day);
-    }
+    setShowAddMenu(false);
+    setSelectedDay(day);
   };
 
   const closeAddMenu = () => {
     setShowAddMenu(false);
-    setAddMenuDate(null);
   };
 
-  const symptomEntryUrl = addMenuDate
-    ? `${createPageUrl("NewSymptomEntry")}?date=${addMenuDate}`
-    : createPageUrl("NewSymptomEntry");
-  const poopEntryUrl = addMenuDate
-    ? `${createPageUrl("NewEntry")}?date=${addMenuDate}`
-    : createPageUrl("NewEntry");
+  const symptomEntryUrl = createPageUrl("NewSymptomEntry");
+  const poopEntryUrl = createPageUrl("NewEntry");
 
   // Merge and sort recent entries
   const recentEntries = [
@@ -140,11 +127,15 @@ export default function Home() {
         {/* Hero */}
         <div className="pt-6 pb-6 relative">
           {/* Top-right settings button requested by product feedback. */}
-          <div className="absolute top-0 right-0" ref={settingsRef}>
+          <div className="absolute top-0 right-0 z-50" ref={settingsRef}>
             <button
               type="button"
               aria-label="Open settings"
-              onClick={() => setShowSettingsMenu((prev) => !prev)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAddMenu(false);
+                setShowSettingsMenu((prev) => !prev);
+              }}
               className="h-11 w-11 rounded-full border border-stone-200 bg-white text-xl shadow-sm hover:shadow-md transition"
             >
               ⚙️

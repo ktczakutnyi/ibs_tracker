@@ -58,6 +58,7 @@ export default function DayEntriesModal({ day, poopEntries, symptomEntries, onCl
   // Bottom-sheet modal that summarizes everything logged for one day.
   const navigate = useNavigate();
   const dateStr = format(day, "yyyy-MM-dd");
+  const hasEntries = poopEntries.length > 0 || symptomEntries.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
@@ -79,6 +80,13 @@ export default function DayEntriesModal({ day, poopEntries, symptomEntries, onCl
         </div>
 
         <div className="space-y-2 mb-4">
+          {!hasEntries && (
+            <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/60 px-4 py-6 text-center">
+              <p className="text-3xl">🗓️</p>
+              <p className="mt-2 text-sm font-semibold text-stone-700">No logs for this day yet</p>
+              <p className="mt-1 text-xs text-stone-500">Use one of the buttons below to add your first log.</p>
+            </div>
+          )}
           {poopEntries.map((e) => (
             <PoopEntryRow
               key={e.id}

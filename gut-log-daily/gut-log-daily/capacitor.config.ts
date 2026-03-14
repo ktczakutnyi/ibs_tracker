@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.ibstracker.app',
   appName: 'IBS Tracker',
   webDir: 'dist',
-  bundledWebRuntime: false,
 };
 
 export default config;
