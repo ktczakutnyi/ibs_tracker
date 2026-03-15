@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { localData } from "@/api/localDataClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addMonths, format } from "date-fns";
@@ -11,6 +11,7 @@ import DayEntriesModal from "@/components/poop/DayEntriesModal";
 import { SYMPTOM_OPTIONS, getSymptomEmoji } from "@/components/poop/SymptomSelector";
 import { cn } from "@/lib/utils";
 import SecuritySettingsCard from "@/components/security/SecuritySettingsCard";
+import { X } from "lucide-react";
 
 function SymptomCard({ entry, onClick }) {
   const emoji = getSymptomEmoji(entry.symptoms || []);
@@ -52,23 +53,11 @@ export default function Home() {
   const [selectedDay, setSelectedDay] = useState(null);
   const [showAddMenu, setShowAddMenu] = useState(false);
 
-  // Settings flyout state (opened by the top-right gear emoji button).
+  // Settings modal state (opened by the top-right gear emoji button).
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
-  const settingsRef = useRef(null);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    // Close the settings menu when user clicks anywhere outside of it.
-    const handleOutside = (event) => {
-      if (!settingsRef.current) return;
-      if (!settingsRef.current.contains(event.target)) setShowSettingsMenu(false);
-    };
-
-    document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, []);
 
   // Load both entry collections. React Query handles caching and background refreshes.
 
@@ -98,6 +87,7 @@ export default function Home() {
   // Always open the same day-details sheet so empty and non-empty days feel consistent.
   const handleDayClick = (day) => {
     setShowAddMenu(false);
+    setShowSettingsMenu(false);
     setSelectedDay(day);
   };
 
@@ -127,24 +117,20 @@ export default function Home() {
         {/* Hero */}
         <div className="pt-6 pb-6 relative">
           {/* Top-right settings button requested by product feedback. */}
-          <div className="absolute top-0 right-0 z-50" ref={settingsRef}>
+          <div className="absolute top-0 right-0 z-50">
             <button
               type="button"
               aria-label="Open settings"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowAddMenu(false);
-                setShowSettingsMenu((prev) => !prev);
+                setSelectedDay(null);
+                setShowSettingsMenu(true);
               }}
               className="h-11 w-11 rounded-full border border-stone-200 bg-white text-xl shadow-sm hover:shadow-md transition"
             >
               ⚙️
             </button>
-            {showSettingsMenu && (
-              <div className="absolute right-0 top-12 z-50">
-                <SecuritySettingsCard onDataChanged={reloadEntries} />
-              </div>
-            )}
           </div>
 
           <div className="text-center">
@@ -206,6 +192,30 @@ export default function Home() {
           symptomEntries={modalSymptoms}
           onClose={() => setSelectedDay(null)}
         />
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsMenu && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowSettingsMenu(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-lg rounded-3xl border border-stone-200 bg-white p-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-stone-700 uppercase tracking-wider">Settings</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setShowSettingsMenu(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <SecuritySettingsCard onDataChanged={reloadEntries} />
+          </div>
+        </div>
       )}
 
       {/* FAB with menu */}
