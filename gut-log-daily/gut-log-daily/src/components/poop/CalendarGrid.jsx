@@ -83,6 +83,7 @@ export default function CalendarGrid({ currentMonth, onMonthChange, entries, onD
               const dateKey = format(d, "yyyy-MM-dd");
               const dayPoops = poopMap[dateKey] || [];
               const daySymptoms = symptomMap[dateKey] || [];
+              const dayEntries = [...dayPoops, ...daySymptoms];
               const hasAny = dayPoops.length > 0 || daySymptoms.length > 0;
               const inMonth = isSameMonth(d, monthStart);
               const today = isToday(d);
@@ -98,7 +99,7 @@ export default function CalendarGrid({ currentMonth, onMonthChange, entries, onD
               return (
                 <button
                   key={di}
-                  onClick={() => onDayClick(d, [])}
+                  onClick={() => onDayClick(d, dayEntries)}
                   className={cn(
                     "relative flex flex-col items-center justify-center py-1 mx-0.5 my-0.5 rounded-xl transition-all min-h-[52px]",
                     inMonth ? "hover:bg-amber-50" : "opacity-30",
